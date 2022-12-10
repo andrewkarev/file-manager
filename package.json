@@ -1,0 +1,19 @@
+{
+  "name": "file-manager",
+  "version": "1.0.0",
+  "description": "The task is to implement file manager using Node.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrewkarev/file-manager.git"
+  },
+  "author": "andrewkarev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrewkarev/file-manager/issues"
+  },
+  "homepage": "https://github.com/andrewkarev/file-manager#readme"
+}
