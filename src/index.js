@@ -21,6 +21,8 @@ import { copy } from './operations-with-file/copy.js';
 import { move } from './operations-with-file/move.js';
 import { getOSInfo } from './operating-system/getOSInfo.js';
 import { printHash } from './operations-with-file/printHash.js';
+import { compress } from './operations-with-file/compress.js';
+import { decompress } from './operations-with-file/decompress.js';
 
 const init = async () => {
   const username = parseUsername();
@@ -47,11 +49,8 @@ const init = async () => {
       if (command === 'rm') await remove(args);
       if (command === 'os') getOSInfo(args);
       if (command === 'hash') await printHash(args);
-
-      if (command === 'compress') {
-      }
-      if (command === 'decompress') {
-      }
+      if (command === 'compress') await compress(args);
+      if (command === 'decompress') await decompress(args);
     } catch (error) {
       if (error instanceof InvalidInputError) console.log(error.message);
       if (error instanceof OperationFailedError) console.log(error.message);
