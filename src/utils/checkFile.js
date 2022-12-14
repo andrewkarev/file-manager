@@ -1,8 +1,8 @@
 import { readdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
-export const checkFile = async (oldPath, filename) => {
-  const files = await readdir(dirname(oldPath), {
+export const checkFile = async (path, filename) => {
+  const files = await readdir(dirname(path), {
     withFileTypes: true,
   });
 
