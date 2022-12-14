@@ -5,6 +5,10 @@ import { printCurrentDir } from '../messages/printCurrentDir.js';
 
 export const getOSInfo = ([args]) => {
   try {
+    if (!args) {
+      throw new CustomError('Please, provide a argument for the "os" command');
+    }
+
     switch (args) {
       case '--EOL':
         console.log(`System End-Of-Line:${JSON.stringify(os.EOL)}`);
