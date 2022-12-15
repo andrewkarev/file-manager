@@ -1,0 +1,9 @@
+export { compress } from './compress.js';
+export { copy } from './copy.js';
+export { create } from './create.js';
+export { decompress } from './decompress.js';
+export { remove } from './delete.js';
+export { move } from './move.js';
+export { printHash } from './printHash.js';
+export { read } from './read.js';
+export { rename } from './rename.js';

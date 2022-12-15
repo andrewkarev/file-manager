@@ -8,27 +8,16 @@ import { parseUsername } from './utils/getUsername.js';
 import { greetUser } from './messages/greetUser.js';
 import { sayBye } from './messages/sayBye.js';
 import { printCurrentDir } from './messages/printCurrentDir.js';
-import { goToHomeDir } from './navigation/goToHomeDir.js';
 import { parseCommand } from './utils/parseCommand.js';
-import { goUp } from './navigation/goUp.js';
-import { goTo } from './navigation/goTo.js';
-import { printDirItems } from './navigation/printDirItems.js';
-import { read } from './operations-with-file/read.js';
-import { create } from './operations-with-file/create.js';
-import { rename } from './operations-with-file/rename.js';
-import { remove } from './operations-with-file/delete.js';
-import { copy } from './operations-with-file/copy.js';
-import { move } from './operations-with-file/move.js';
 import { getOSInfo } from './operating-system/getOSInfo.js';
-import { printHash } from './operations-with-file/printHash.js';
-import { compress } from './operations-with-file/compress.js';
-import { decompress } from './operations-with-file/decompress.js';
+import * as fo from './operations-with-file/index.js';
+import * as nav from './navigation/index.js';
 
 const init = async () => {
   const username = parseUsername();
 
   greetUser(username);
-  goToHomeDir();
+  nav.goToHomeDir();
   printCurrentDir();
 
   const rl = createInterface({ input, output });
@@ -38,19 +27,19 @@ const init = async () => {
       const [command, ...args] = parseCommand(input);
 
       if (command === '.exit') rl.close();
-      if (command === 'up') goUp();
-      if (command === 'cd') goTo(args);
-      if (command === 'ls') await printDirItems();
-      if (command === 'cat') await read(args);
-      if (command === 'add') await create(args);
-      if (command === 'rn') await rename(args);
-      if (command === 'cp') await copy(args);
-      if (command === 'mv') await move(args);
-      if (command === 'rm') await remove(args);
+      if (command === 'up') nav.goUp();
+      if (command === 'cd') nav.goTo(args);
+      if (command === 'ls') await nav.printDirItems();
+      if (command === 'cat') await fo.read(args);
+      if (command === 'add') await fo.create(args);
+      if (command === 'rn') await fo.rename(args);
+      if (command === 'cp') await fo.copy(args);
+      if (command === 'mv') await fo.move(args);
+      if (command === 'rm') await fo.remove(args);
       if (command === 'os') getOSInfo(args);
-      if (command === 'hash') await printHash(args);
-      if (command === 'compress') await compress(args);
-      if (command === 'decompress') await decompress(args);
+      if (command === 'hash') await fo.printHash(args);
+      if (command === 'compress') await fo.compress(args);
+      if (command === 'decompress') await fo.decompress(args);
     } catch (error) {
       if (error instanceof InvalidInputError) console.log(error.message);
       if (error instanceof OperationFailedError) console.log(error.message);
