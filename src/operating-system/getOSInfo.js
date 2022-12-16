@@ -1,17 +1,18 @@
 import os from 'node:os';
 import { CustomError } from '../errors/CustomError.js';
+import { InvalidInputError } from '../errors/InvalidInputError.js';
 import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
 
 export const getOSInfo = ([args]) => {
   try {
     if (!args) {
-      throw new CustomError('Please, provide a argument for the "os" command');
+      throw new CustomError('Please, provide an argument for the "os" command');
     }
 
     switch (args) {
       case '--EOL':
-        console.log(`System End-Of-Line:${JSON.stringify(os.EOL)}`);
+        console.log(`System End-Of-Line: ${JSON.stringify(os.EOL)}`);
         break;
       case '--cpus':
         const cpusInfo = os.cpus();
@@ -38,7 +39,10 @@ export const getOSInfo = ([args]) => {
 
     printCurrentDir();
   } catch (error) {
-    if (error instanceof CustomError) console.log(error.message);
+    if (error instanceof CustomError) {
+      console.log(error.message);
+      throw new InvalidInputError('Invalid input');
+    }
 
     throw new OperationFailedError('Operation failed');
   }
