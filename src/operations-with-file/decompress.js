@@ -34,28 +34,30 @@ export const decompress = async ([pathToFile, pathToDestination]) => {
     }
 
     const isPathToFile = await isFile(sourceFilePath);
+
     if (!isPathToFile) {
       throw new CustomError('Only files can be decompressed');
     }
 
-    const decompressedFileName = basename(pathToDestination);
+    const sourceFileName = basename(sourceFilePath);
+    const fileToDecompressName = basename(pathToDestination);
 
     const decompressedFilePath = join(
       decompressedFileDirPath,
-      decompressedFileName
+      fileToDecompressName
     );
 
     if (await checkIsFileExist(decompressedFilePath)) {
       throw new CustomError('A file with the same name already exists');
     }
 
-    if (!validateFilename(decompressedFileName)) {
+    if (!validateFilename(fileToDecompressName)) {
       throw new CustomError(
         '"/|\\" and white spaces are not allowed in a filename'
       );
     }
 
-    if (!decompressedFileName.endsWith('.br')) {
+    if (!sourceFileName.endsWith('.br')) {
       throw new CustomError(
         'You can only decompress files compressed with the Brotli algorithm that have the "br" extension'
       );
