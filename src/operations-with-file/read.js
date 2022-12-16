@@ -1,21 +1,46 @@
 import { createReadStream } from 'fs';
 import { access } from 'fs/promises';
+import { CustomError } from '../errors/CustomError.js';
+import { InvalidInputError } from '../errors/InvalidInputError.js';
 import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
+import { getAbsolutePath } from '../utils/getAbsolutePath.js';
+import { isFile } from '../utils/isFile.js';
+import { stdout } from 'node:process';
 
 export const read = async ([path]) => {
   try {
-    await access(path);
+    if (!path) {
+      throw new InvalidInputError('Please, provide a path to the file');
+    }
 
-    const stream = createReadStream(path, 'utf-8');
-    let streamContent = '';
+    const pathToRead = getAbsolutePath(path);
 
-    stream.on('data', (chunk) => (streamContent += chunk));
-    stream.on('end', () => {
-      console.log(streamContent + '\n');
+    await access(pathToRead);
+
+    const isPathToFile = await isFile(pathToRead);
+
+    if (!isPathToFile) {
+      throw new CustomError('Only files can be read');
+    }
+
+    const readStream = createReadStream(pathToRead, 'utf-8');
+    readStream.pipe(stdout);
+
+    readStream.on('end', () => {
+      stdout._write('\n');
       printCurrentDir();
     });
   } catch (error) {
+    if (error instanceof InvalidInputError) {
+      console.log(error.message);
+      throw new InvalidInputError('Invalid input');
+    }
+
+    if (error instanceof CustomError) {
+      console.log(error.message);
+    }
+
     throw new OperationFailedError('Operation failed');
   }
 };
