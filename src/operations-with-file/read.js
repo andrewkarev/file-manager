@@ -2,11 +2,11 @@ import { createReadStream } from 'fs';
 import { access } from 'fs/promises';
 import { CustomError } from '../errors/CustomError.js';
 import { InvalidInputError } from '../errors/InvalidInputError.js';
-import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
 import { getAbsolutePath } from '../utils/getAbsolutePath.js';
 import { isFile } from '../utils/isFile.js';
 import { stdout } from 'node:process';
+import { handleError } from '../utils/handleError.js';
 
 export const read = async ([path]) => {
   try {
@@ -32,15 +32,6 @@ export const read = async ([path]) => {
       printCurrentDir();
     });
   } catch (error) {
-    if (error instanceof InvalidInputError) {
-      console.log(error.message);
-      throw new InvalidInputError('Invalid input');
-    }
-
-    if (error instanceof CustomError) {
-      console.log(error.message);
-    }
-
-    throw new OperationFailedError('Operation failed');
+    handleError(error);
   }
 };

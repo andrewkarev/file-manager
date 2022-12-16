@@ -1,9 +1,9 @@
 import { open } from 'node:fs/promises';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
-import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { validateFilename } from '../utils/validateFilename.js';
 import { CustomError } from '../errors/CustomError.js';
 import { InvalidInputError } from '../errors/InvalidInputError.js';
+import { handleError } from '../utils/handleError.js';
 
 export const create = async ([filename]) => {
   try {
@@ -24,17 +24,10 @@ export const create = async ([filename]) => {
     await file.close();
     printCurrentDir();
   } catch (error) {
-    if (error instanceof CustomError) console.log(error.message);
-
     if (error.code === 'EEXIST') {
       console.log('A file with the same name already exists');
     }
 
-    if (error instanceof InvalidInputError) {
-      console.log(error.message);
-      throw new InvalidInputError('Invalid input');
-    }
-
-    throw new OperationFailedError('Operation failed');
+    handleError(error);
   }
 };

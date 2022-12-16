@@ -1,8 +1,8 @@
 import { readdir } from 'node:fs/promises';
 import { cwd } from 'node:process';
 import { sortAscending } from '../utils/sortAscending.js';
-import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
+import { handleError } from '../utils/handleError.js';
 
 export const printDirItems = async () => {
   try {
@@ -23,6 +23,6 @@ export const printDirItems = async () => {
     console.table([...sortAscending(folders), ...sortAscending(files)]);
     printCurrentDir();
   } catch (error) {
-    throw new OperationFailedError('Operation failed');
+    handleError(error);
   }
 };

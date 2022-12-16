@@ -1,13 +1,14 @@
 import os from 'node:os';
-import { CustomError } from '../errors/CustomError.js';
 import { InvalidInputError } from '../errors/InvalidInputError.js';
-import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
+import { handleError } from '../utils/handleError.js';
 
 export const getOSInfo = ([args]) => {
   try {
     if (!args) {
-      throw new CustomError('Please, provide an argument for the "os" command');
+      throw new InvalidInputError(
+        'Please, provide an argument for the "os" command'
+      );
     }
 
     switch (args) {
@@ -34,16 +35,11 @@ export const getOSInfo = ([args]) => {
         console.log(`CPU architecture: ${os.arch()}`);
         break;
       default:
-        throw new CustomError(`command 'os ${args}' not found`);
+        throw new InvalidInputError(`command 'os ${args}' not found`);
     }
 
     printCurrentDir();
   } catch (error) {
-    if (error instanceof CustomError) {
-      console.log(error.message);
-      throw new InvalidInputError('Invalid input');
-    }
-
-    throw new OperationFailedError('Operation failed');
+    handleError(error);
   }
 };

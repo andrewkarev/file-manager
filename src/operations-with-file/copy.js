@@ -1,12 +1,12 @@
 import { basename, join } from 'node:path';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { checkIsFileExist } from '../utils/checkIsFileExist.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
 import { CustomError } from '../errors/CustomError.js';
 import { InvalidInputError } from '../errors/InvalidInputError.js';
 import { getAbsolutePath } from '../utils/getAbsolutePath.js';
 import { isFile } from '../utils/isFile.js';
+import { handleError } from '../utils/handleError.js';
 
 export const copy = async ([pathToOldFile, pathToNewDir]) => {
   try {
@@ -50,13 +50,6 @@ export const copy = async ([pathToOldFile, pathToNewDir]) => {
 
     printCurrentDir();
   } catch (error) {
-    if (error instanceof CustomError) console.log(error.message);
-
-    if (error instanceof InvalidInputError) {
-      console.log(error.message);
-      throw new InvalidInputError('Invalid input');
-    }
-
-    throw new OperationFailedError('Operation failed');
+    handleError(error);
   }
 };
