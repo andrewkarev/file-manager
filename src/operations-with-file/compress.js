@@ -1,30 +1,31 @@
 import { join, dirname, basename } from 'node:path';
-import { cwd } from 'node:process';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { createBrotliCompress } from 'node:zlib';
 import { CustomError } from '../errors/CustomError.js';
 import { OperationFailedError } from '../errors/OperationFailedError.js';
-import { checkFile } from '../utils/checkFile.js';
 import { checkIsFileExist } from '../utils/checkIsFileExist.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
 import { validateFilename } from '../utils/validateFilename.js';
+import { InvalidInputError } from '../errors/InvalidInputError.js';
+import { getAbsolutePath } from '../utils/getAbsolutePath.js';
+import { isFile } from '../utils/isFile.js';
 
 export const compress = async ([pathToFile, pathToDestination]) => {
   try {
     if (!pathToFile) {
-      throw new CustomError('Please, provide a path to the source file');
+      throw new InvalidInputError('Please, provide a path to the source file');
     }
 
     if (!pathToDestination) {
-      throw new CustomError(
+      throw new InvalidInputError(
         'Please, provide the path to save the compressed file'
       );
     }
 
-    const sourceFilePath = join(cwd(), pathToFile);
-    const compressedDirPath = join(cwd(), dirname(pathToDestination));
+    const sourceFilePath = getAbsolutePath(pathToFile);
+    const compressedFileDirPath = getAbsolutePath(dirname(pathToDestination));
     const isSourceFile = await checkIsFileExist(sourceFilePath);
-    const isDestinationDir = await checkIsFileExist(compressedDirPath);
+    const isDestinationDir = await checkIsFileExist(compressedFileDirPath);
 
     if (!isSourceFile || !isDestinationDir) {
       throw new CustomError(
@@ -32,29 +33,27 @@ export const compress = async ([pathToFile, pathToDestination]) => {
       );
     }
 
-    const filename = basename(sourceFilePath);
-    const isFile = await checkFile(sourceFilePath, filename);
+    const isPathToFile = await isFile(sourceFilePath);
 
-    if (!isFile) {
+    if (!isPathToFile) {
       throw new CustomError('Only files can be compressed');
     }
 
     const compressedFileName = basename(pathToDestination).concat('.br');
+    const compressedFilePath = join(compressedFileDirPath, compressedFileName);
 
-    if (await checkIsFileExist(compressedFileName)) {
+    if (await checkIsFileExist(compressedFilePath)) {
       throw new CustomError('A file with the same name already exists');
     }
 
     if (!validateFilename(compressedFileName)) {
       throw new CustomError(
-        '"/,|,\\" and white spaces are not allowed in a filename'
+        '"/|\\" and white spaces are not allowed in a filename'
       );
     }
 
     const readStream = createReadStream(sourceFilePath);
-    const writeStream = createWriteStream(
-      join(compressedDirPath, compressedFileName)
-    );
+    const writeStream = createWriteStream(compressedFilePath);
 
     const brotli = createBrotliCompress();
 
@@ -66,6 +65,11 @@ export const compress = async ([pathToFile, pathToDestination]) => {
     });
   } catch (error) {
     if (error instanceof CustomError) console.log(error.message);
+
+    if (error instanceof InvalidInputError) {
+      console.log(error.message);
+      throw new InvalidInputError('Invalid input');
+    }
 
     throw new OperationFailedError('Operation failed');
   }
