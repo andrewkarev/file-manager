@@ -1,26 +1,29 @@
 import { basename, join } from 'node:path';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { cwd } from 'node:process';
 import { OperationFailedError } from '../errors/OperationFailedError.js';
 import { checkIsFileExist } from '../utils/checkIsFileExist.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
 import { CustomError } from '../errors/CustomError.js';
-import { checkFile } from '../utils/checkFile.js';
+import { InvalidInputError } from '../errors/InvalidInputError.js';
+import { getAbsolutePath } from '../utils/getAbsolutePath.js';
+import { isFile } from '../utils/isFile.js';
 
 export const copy = async ([pathToOldFile, pathToNewDir]) => {
   try {
     if (!pathToOldFile) {
-      throw new CustomError('Please, provide a path to the directory');
+      throw new InvalidInputError('Please, provide a path to the directory');
     }
 
     if (!pathToNewDir) {
-      throw new CustomError('Please, provide a path to the new directory');
+      throw new InvalidInputError(
+        'Please, provide a path to the new directory'
+      );
     }
 
-    const oldPath = join(cwd(), pathToOldFile);
-    const newDirPath = join(cwd(), pathToNewDir);
-    const isOldPathValid = await checkIsFileExist(oldPath);
-    const isNewPathValid = await checkIsFileExist(newDirPath);
+    const pathToSource = getAbsolutePath(pathToOldFile);
+    const pathToDestinationDir = getAbsolutePath(pathToNewDir);
+    const isOldPathValid = await checkIsFileExist(pathToSource);
+    const isNewPathValid = await checkIsFileExist(pathToDestinationDir);
 
     if (!isOldPathValid || !isNewPathValid) {
       throw new CustomError(
@@ -28,11 +31,11 @@ export const copy = async ([pathToOldFile, pathToNewDir]) => {
       );
     }
 
-    const filename = basename(oldPath);
-    const newPath = join(newDirPath, filename);
-    const isFile = await checkFile(oldPath, filename);
+    const filename = basename(pathToSource);
+    const newPath = join(pathToDestinationDir, filename);
+    const isPathToFile = await isFile(pathToSource);
 
-    if (!isFile) {
+    if (!isPathToFile) {
       throw new CustomError('Only files can be copied');
     }
 
@@ -40,7 +43,7 @@ export const copy = async ([pathToOldFile, pathToNewDir]) => {
       throw new CustomError('A file with the same name already exists');
     }
 
-    const readStream = createReadStream(oldPath);
+    const readStream = createReadStream(pathToSource);
     const writeStream = createWriteStream(newPath);
 
     readStream.pipe(writeStream);
@@ -48,6 +51,11 @@ export const copy = async ([pathToOldFile, pathToNewDir]) => {
     printCurrentDir();
   } catch (error) {
     if (error instanceof CustomError) console.log(error.message);
+
+    if (error instanceof InvalidInputError) {
+      console.log(error.message);
+      throw new InvalidInputError('Invalid input');
+    }
 
     throw new OperationFailedError('Operation failed');
   }
