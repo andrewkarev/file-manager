@@ -13,6 +13,4 @@ export const goUp = () => {
   }
 
   printCurrentDir();
-
-  return;
 };
