@@ -5,6 +5,7 @@ import { InvalidInputError } from '../errors/InvalidInputError.js';
 import { printCurrentDir } from '../messages/printCurrentDir.js';
 import { getAbsolutePath } from '../utils/getAbsolutePath.js';
 import { handleError } from '../utils/handleError.js';
+import { getRootDir } from '../utils/getRootDir.js';
 
 export const goTo = ([path]) => {
   try {
@@ -12,11 +13,13 @@ export const goTo = ([path]) => {
       throw new InvalidInputError('Please, provide a path to change directory');
     }
 
+    const rootDir = getRootDir();
     const homeDir = homedir();
     const pathToGo = getAbsolutePath(path);
-    const isRootDir = pathToGo.toLowerCase() === dirname(homeDir).toLowerCase();
+    const isHomeDir = pathToGo.toLowerCase() === dirname(homeDir).toLowerCase();
+    const isRootDir = pathToGo.toLowerCase() === rootDir.toLowerCase();
 
-    isRootDir ? chdir(homeDir) : chdir(pathToGo);
+    isHomeDir || isRootDir ? chdir(homeDir) : chdir(pathToGo);
 
     printCurrentDir();
   } catch (error) {
